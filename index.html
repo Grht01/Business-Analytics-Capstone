@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stance Analysis of Public Climate and Sustainability Discussion</title>
+<meta name="description" content="Replication archive for a BBA capstone study of climate change stance on Twitter, using binary logistic regression with country-clustered inference.">
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#ffffff; --fg:#141414; --muted:#5a5a5a; --line:#e3e3e3;
+    --card:#f7f7f7; --accent:#111111;
+  }
+  :root:not([data-theme="light"]){ }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121212; --fg:#ececec; --muted:#a6a6a6; --line:#2c2c2c;
+      --card:#1b1b1b; --accent:#ffffff;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121212; --fg:#ececec; --muted:#a6a6a6; --line:#2c2c2c;
+    --card:#1b1b1b; --accent:#ffffff;
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.65; font-size:17px;
+  }
+  .wrap{max-width:860px; margin:0 auto; padding:56px 22px 90px}
+  header{border-bottom:1px solid var(--line); padding-bottom:28px; margin-bottom:38px}
+  .kicker{font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  h1{font-size:32px; line-height:1.24; margin:14px 0 10px; font-weight:700}
+  .sub{font-size:18px; color:var(--muted); margin:0 0 18px}
+  .meta{font-size:15px; color:var(--muted); margin:0}
+  .meta strong{color:var(--fg); font-weight:600}
+  h2{font-size:21px; margin:42px 0 14px; font-weight:700}
+  h3{font-size:16px; margin:26px 0 8px; font-weight:700}
+  p{margin:0 0 15px}
+  a{color:var(--fg); text-underline-offset:3px}
+  a:hover{opacity:.7}
+  table{width:100%; border-collapse:collapse; margin:16px 0 10px; font-size:15px; display:block; overflow-x:auto}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{font-weight:700; border-bottom:2px solid var(--fg); white-space:nowrap}
+  td code, p code, li code{
+    background:var(--card); padding:2px 6px; border-radius:4px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13.5px;
+  }
+  pre{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    padding:15px 17px; overflow-x:auto; font-size:13.5px; line-height:1.55;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; margin:12px 0 18px;
+  }
+  .card{background:var(--card); border-radius:10px; padding:18px 20px; margin:18px 0}
+  .card p:last-child{margin-bottom:0}
+  ol,ul{margin:0 0 16px; padding-left:22px}
+  li{margin-bottom:7px}
+  .note{font-size:14.5px; color:var(--muted)}
+  footer{margin-top:60px; padding-top:24px; border-top:1px solid var(--line); font-size:14.5px; color:var(--muted)}
+  .pill{
+    display:inline-block; border:1px solid var(--line); border-radius:999px;
+    padding:3px 11px; font-size:13px; color:var(--muted); margin:0 6px 6px 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Replication Archive</div>
+  <h1>Stance Analysis of Public Climate and Sustainability Discussion</h1>
+  <p class="sub">Affective, Rhetorical, and Experiential Drivers of Climate Stance, Moderated by Country Economy</p>
+  <p class="meta">
+    <strong>Golam Rahat</strong> &nbsp;·&nbsp; ID 1112310093<br>
+    BSA 4401 Business Analytics Capstone &nbsp;·&nbsp; Summer 2026<br>
+    Supervisor: Dr. Md. Qamruzzaman<br>
+    School of Business and Economics, United International University
+  </p>
+</header>
+
+<p>This repository holds the data extract, estimation code, and output tables behind the capstone report. It exists so that every statistic in the report can be traced back to the command that produced it. Running the two scripts below on the supplied data reproduces every table and figure in Chapter IV and every appendix table.</p>
+
+<div class="card">
+  <p><strong>What the study asks.</strong> Do three properties of a tweet predict whether it takes a believer or a denier position on climate change: how positive it sounds, how aggressive its language is, and how unusual the local temperature was? And does the economic development level of the country it comes from change how strongly each of those works?</p>
+</div>
+
+<h2>Repository contents</h2>
+<table>
+  <thead><tr><th>File</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>Stance_sample_data.zip</code></td>
+      <td>The analytic data extract. A stratified random draw of 250,000 tweets from the Climate Change Twitter Dataset, taken with seed 42. Fourteen columns per tweet, covering stance, sentiment, aggressiveness, inferred gender, local temperature anomaly, coordinates, country, and World Bank income group.</td>
+    </tr>
+    <tr>
+      <td><code>analysis.R</code></td>
+      <td>Main estimation script. Builds the analytic sample, estimates Equations 1 to 4, computes diagnostics and average marginal effects, and runs robustness checks R1 to R4. Ends with a self-verification block that checks its own output against the values reported in the report.</td>
+    </tr>
+    <tr>
+      <td><code>placebo_permutation_test.R</code></td>
+      <td>Falsification test. Reassigns the developed and developing labels across the 142 countries 500 times and builds an empirical null distribution for each interaction coefficient.</td>
+    </tr>
+    <tr>
+      <td><code>results.zip</code></td>
+      <td>Output tables written by the scripts, as CSV.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>How to reproduce</h2>
+<ol>
+  <li>Clone or download the repository and unzip <code>Stance_sample_data.zip</code> so that <code>Stance_sample_data.csv</code> sits beside the two scripts.</li>
+  <li>Open R, set that folder as the working directory.</li>
+  <li>Run the main estimation. Missing packages install automatically.
+    <pre>source("analysis.R")</pre>
+    Expect 15 to 45 minutes. The country random-intercept model in Equation 4 is the slow step and can be skipped by setting <code>RUN_GLMER &lt;- FALSE</code>.
+  </li>
+  <li>Run the falsification test.
+    <pre>source("placebo_permutation_test.R")</pre>
+    Expect 4 to 8 minutes at 500 permutations.
+  </li>
+  <li>Output lands in a <code>results/</code> folder. The final section of <code>analysis.R</code> prints a verification table comparing its own figures against those in the report; every row should read OK.</li>
+</ol>
+
+<div class="card">
+  <p class="note"><strong>Guard rails.</strong> Both scripts stop immediately if the input is not 250,000 rows or the analytic sample is not 196,406 rows, so loading the wrong file fails loudly rather than producing plausible but wrong numbers.</p>
+</div>
+
+<h2>Method in brief</h2>
+<p>The outcome is binary, believer against denier, so estimation is by binary logistic regression. Country economy and every interaction built from it are country-level quantities applied to tweet-level observations, so tweets from the same country are not independent with respect to the moderator. Inference therefore uses country-clustered standard errors alongside a country random intercept, and moderation is read through average marginal effects rather than raw interaction coefficients.</p>
+
+<h3>Analytic sample</h3>
+<p>
+  <span class="pill">196,406 tweets</span>
+  <span class="pill">142 countries</span>
+  <span class="pill">2006 to 2019</span>
+  <span class="pill">179,872 developed</span>
+  <span class="pill">16,534 developing</span>
+</p>
+
+<h3>Headline results</h3>
+<table>
+  <thead><tr><th>Hypothesis</th><th>Effect</th><th>Outcome</th></tr></thead>
+  <tbody>
+    <tr><td>H1 Sentiment</td><td>+4.38 pp per 1 SD</td><td>Supported</td></tr>
+    <tr><td>H2 Aggressiveness</td><td>-3.83 pp</td><td>Supported</td></tr>
+    <tr><td>H3 Temperature anomaly</td><td>+1.20 pp per 1 SD</td><td>Supported</td></tr>
+    <tr><td>H4 Economy moderates sentiment</td><td>OR 0.534</td><td>Supported</td></tr>
+    <tr><td>H5 Economy moderates aggressiveness</td><td>OR 1.517</td><td>Supported</td></tr>
+    <tr><td>H6 Economy moderates temperature</td><td>OR 1.023</td><td>Not supported</td></tr>
+  </tbody>
+</table>
+<p class="note">Marginal effects are for developed economies, in percentage points on the probability of a believer stance. Odds ratios are from the interaction terms under country-clustered inference. All six decisions are identical under the pooled, clustered, fixed effects and random intercept specifications.</p>
+
+<h3>A result worth stating plainly</h3>
+<p>The model carries real information about the ordering of cases, with an area under the curve of 0.700. At the conventional 0.5 classification threshold it nonetheless identifies no deniers at all, and its accuracy of 0.9152 is exactly the believer base rate. Association at population scale and usable detection are different achievements, and this study delivers the first without the second.</p>
+
+<h2>Software environment</h2>
+<table>
+  <thead><tr><th>Component</th><th>Version</th></tr></thead>
+  <tbody>
+    <tr><td>R</td><td>4.5.2 (2025-10-31 ucrt), Windows 11 x64</td></tr>
+    <tr><td>lme4</td><td>1.1-38</td></tr>
+    <tr><td>marginaleffects</td><td>0.32.0</td></tr>
+    <tr><td>sandwich / lmtest</td><td>3.1-3 / 0.9-40</td></tr>
+    <tr><td>car / pROC / nnet</td><td>3.1-3 / 1.19.0.1 / 7.3-20</td></tr>
+    <tr><td>tidyverse</td><td>2.0.0</td></tr>
+  </tbody>
+</table>
+<p class="note">The scripts avoid <code>broom</code> and <code>broom.mixed</code> deliberately, because they carry a <code>purrr</code> version dependency that can fail on an otherwise working installation. Model output is extracted with base R instead.</p>
+
+<h2>Data provenance</h2>
+<p>The data here is a derived sample, not the original corpus. It comes from the Climate Change Twitter Dataset compiled and released by Effrosynidis, Karasakalidis, Sylaios and Arampatzis, who documented it in <em>Expert Systems with Applications</em> (2022) and reported the descriptive analysis in <em>PLOS ONE</em> (2022). All credit for the underlying collection and annotation belongs to them. Anyone reusing this extract should cite the original dataset and check its licence terms, and should treat every label in it as a machine classification carrying error rather than as verified ground truth.</p>
+
+<h2>Citation</h2>
+<pre>Rahat, G. (2026). Stance analysis of public climate and sustainability
+discussion: Affective, rhetorical, and experiential drivers of climate
+stance, moderated by country economy [Capstone report]. School of
+Business and Economics, United International University.</pre>
+
+<footer>
+  <p>Replication archive for BSA 4401, Summer 2026. Code and derived data are provided for verification of the reported analysis.</p>
+</footer>
+
+</div>
+</body>
+</html>
